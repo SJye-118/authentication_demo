@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'joke_service_api.dart'; // Import the JokeService
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -82,10 +83,31 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   final String username;
 
   WelcomePage({required this.username});
+
+  @override
+  _WelcomePageState createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
+  late JokeService _jokeService;
+  late Future<String> _futureJoke;
+
+  @override
+  void initState() {
+    super.initState();
+    _jokeService = JokeService();
+    _futureJoke = _jokeService.fetchJoke();
+  }
+
+  void _refreshJoke() {
+    setState(() {
+      _futureJoke = _jokeService.fetchJoke();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,13 +120,34 @@ class WelcomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Welcome, $username!',
+              'Welcome, ${widget.username}!',
               style: TextStyle(fontSize: 24),
             ),
             SizedBox(height: 10),
             Text(
               'Greetings from TAY SHI JYE',
               style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 20),
+            FutureBuilder<String>(
+              future: _futureJoke,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(
+                    snapshot.data!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text("Error: ${snapshot.error}");
+                }
+                return CircularProgressIndicator();
+              },
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _refreshJoke,
+              child: Text('Get New Joke'),
             ),
           ],
         ),
