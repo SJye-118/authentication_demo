@@ -1,6 +1,6 @@
 # demoauth
 
-A new Flutter project.
+A new Flutter project. For Context, i have implemented the authentication feature into my flutter app by linking Firebase.
 
 ## Getting Started
 
